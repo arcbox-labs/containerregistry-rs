@@ -1,0 +1,17 @@
+[package]
+name = "containerregistry-image"
+description = "OCI/Docker image manifest, index, and layer types"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
+hex.workspace = true
+thiserror.workspace = true
+
+[dev-dependencies]
+tempfile.workspace = true
