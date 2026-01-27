@@ -212,9 +212,7 @@ fn normalize_registry(registry: &str) -> String {
     let registry = registry.trim_end_matches('/');
 
     // Remove common path suffixes like /v1, /v2
-    let registry = registry
-        .trim_end_matches("/v1")
-        .trim_end_matches("/v2");
+    let registry = registry.trim_end_matches("/v1").trim_end_matches("/v2");
 
     // Normalize Docker Hub references
     match registry {
@@ -293,7 +291,10 @@ mod tests {
         }"#;
 
         let config: DockerConfig = serde_json::from_str(json).unwrap();
-        assert_eq!(config.cred_helpers.get("gcr.io"), Some(&"gcloud".to_string()));
+        assert_eq!(
+            config.cred_helpers.get("gcr.io"),
+            Some(&"gcloud".to_string())
+        );
     }
 
     #[test]

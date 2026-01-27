@@ -1,0 +1,6 @@
+# Test fixtures directory
+# Subdirectories:
+# - oci/: OCI image manifest fixtures
+# - docker/: Docker v2 manifest fixtures
+# - index/: Multi-arch index fixtures
+# - layout/: OCI image layout fixtures

@@ -125,15 +125,13 @@ impl Error {
             Self::NotFound(_) => Some("verify the image reference exists and you have access"),
             Self::Unauthorized(_) => Some("check your credentials or run 'docker login'"),
             Self::Forbidden(_) => Some("you may not have permission to access this resource"),
-            Self::DigestMismatch { .. } => {
-                Some("the content was modified during transfer or the server returned incorrect data")
-            }
+            Self::DigestMismatch { .. } => Some(
+                "the content was modified during transfer or the server returned incorrect data",
+            ),
             Self::Timeout { .. } => {
                 Some("try increasing the timeout or check your network connection")
             }
-            Self::ConnectionFailed { .. } => {
-                Some("check your network connection and registry URL")
-            }
+            Self::ConnectionFailed { .. } => Some("check your network connection and registry URL"),
             Self::RateLimited { .. } => Some("wait and retry, or reduce request frequency"),
             _ => None,
         }
@@ -171,16 +169,20 @@ mod tests {
             }
             .is_retryable()
         );
-        assert!(Error::UnexpectedStatus {
-            status: 503,
-            message: "test".to_string()
-        }
-        .is_retryable());
-        assert!(!Error::UnexpectedStatus {
-            status: 400,
-            message: "test".to_string()
-        }
-        .is_retryable());
+        assert!(
+            Error::UnexpectedStatus {
+                status: 503,
+                message: "test".to_string()
+            }
+            .is_retryable()
+        );
+        assert!(
+            !Error::UnexpectedStatus {
+                status: 400,
+                message: "test".to_string()
+            }
+            .is_retryable()
+        );
     }
 
     #[test]
@@ -190,7 +192,10 @@ mod tests {
             Error::Unauthorized("test".to_string()).status_code(),
             Some(401)
         );
-        assert_eq!(Error::Forbidden("test".to_string()).status_code(), Some(403));
+        assert_eq!(
+            Error::Forbidden("test".to_string()).status_code(),
+            Some(403)
+        );
         assert_eq!(
             Error::UnexpectedStatus {
                 status: 503,
@@ -205,9 +210,11 @@ mod tests {
     fn test_hint() {
         assert!(Error::NotFound("test".to_string()).hint().is_some());
         assert!(Error::Unauthorized("test".to_string()).hint().is_some());
-        assert!(Error::Json(serde_json::from_str::<()>("invalid").unwrap_err())
-            .hint()
-            .is_none());
+        assert!(
+            Error::Json(serde_json::from_str::<()>("invalid").unwrap_err())
+                .hint()
+                .is_none()
+        );
     }
 
     #[test]

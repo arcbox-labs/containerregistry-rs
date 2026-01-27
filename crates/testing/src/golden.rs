@@ -145,11 +145,14 @@ pub fn assert_digest_eq(expected: &Digest, actual: &Digest) {
 
 /// Asserts that two manifests are byte-equivalent.
 pub fn assert_manifest_eq(expected: &Manifest, actual: &Manifest) {
-    let expected_bytes = expected.to_bytes().expect("expected manifest serialization");
+    let expected_bytes = expected
+        .to_bytes()
+        .expect("expected manifest serialization");
     let actual_bytes = actual.to_bytes().expect("actual manifest serialization");
 
     assert_eq!(
-        expected_bytes, actual_bytes,
+        expected_bytes,
+        actual_bytes,
         "Manifest mismatch:\n  Expected digest: {}\n  Actual digest: {}",
         Digest::sha256(&expected_bytes),
         Digest::sha256(&actual_bytes)

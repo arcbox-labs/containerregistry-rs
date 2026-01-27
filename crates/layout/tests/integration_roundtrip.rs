@@ -63,7 +63,13 @@ fn build_minimal_manifest() -> (Vec<u8>, Vec<u8>, Manifest, Digest, Digest) {
     let oci = OciManifest::new(config_desc, vec![layer_desc]);
     let manifest = Manifest::Oci(oci);
 
-    (config_bytes, layer_bytes, manifest, config_digest, layer_digest)
+    (
+        config_bytes,
+        layer_bytes,
+        manifest,
+        config_digest,
+        layer_digest,
+    )
 }
 
 #[tokio::test]
@@ -132,14 +138,8 @@ async fn test_registry_layout_roundtrip() {
 
     let repo2 = unique_repo("roundtrip-copy");
     let reference2: Reference = format!("{addr}/{repo2}:{tag}").parse().unwrap();
-    client
-        .put_blob(&reference2, &fetched_config)
-        .await
-        .unwrap();
-    client
-        .put_blob(&reference2, &fetched_layer)
-        .await
-        .unwrap();
+    client.put_blob(&reference2, &fetched_config).await.unwrap();
+    client.put_blob(&reference2, &fetched_layer).await.unwrap();
     let digest2 = client
         .put_manifest(&reference2, &fetched_manifest)
         .await

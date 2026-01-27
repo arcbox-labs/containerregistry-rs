@@ -217,7 +217,10 @@ impl OciIndex {
     pub fn try_to_docker(&self) -> Result<DockerManifestList> {
         // Check that all manifest descriptors have convertible media types
         for (i, m) in self.manifests.iter().enumerate() {
-            if matches!(m.media_type, MediaType::OciIndex | MediaType::DockerManifestList) {
+            if matches!(
+                m.media_type,
+                MediaType::OciIndex | MediaType::DockerManifestList
+            ) {
                 return Err(Error::InvalidManifest(format!(
                     "manifests[{}] has media type {} which cannot be converted to Docker manifest list",
                     i, m.media_type

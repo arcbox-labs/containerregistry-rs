@@ -63,7 +63,13 @@ fn build_minimal_manifest() -> (Vec<u8>, Vec<u8>, Manifest, Digest, Digest) {
     let oci = OciManifest::new(config_desc, vec![layer_desc]);
     let manifest = Manifest::Oci(oci);
 
-    (config_bytes, layer_bytes, manifest, config_digest, layer_digest)
+    (
+        config_bytes,
+        layer_bytes,
+        manifest,
+        config_digest,
+        layer_digest,
+    )
 }
 
 fn run_gcrane(args: &[&str]) -> std::process::Output {

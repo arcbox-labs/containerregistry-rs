@@ -70,8 +70,8 @@ impl Credential {
             Credential::Anonymous => None,
             Credential::Basic { username, password } => {
                 use base64::Engine;
-                let encoded =
-                    base64::engine::general_purpose::STANDARD.encode(format!("{}:{}", username, password));
+                let encoded = base64::engine::general_purpose::STANDARD
+                    .encode(format!("{}:{}", username, password));
                 Some(format!("Basic {}", encoded))
             }
             Credential::Bearer(token) => Some(format!("Bearer {}", token)),

@@ -32,12 +32,20 @@ fn test_parity_cli_digest_manifest_ls() {
     let digest = runner
         .compare_digest(&reference)
         .expect("run digest parity");
-    assert!(digest.passed, "digest parity failed: {:?}", digest.differences);
+    assert!(
+        digest.passed,
+        "digest parity failed: {:?}",
+        digest.differences
+    );
 
     let manifest = runner
         .compare_manifest(&reference)
         .expect("run manifest parity");
-    assert!(manifest.passed, "manifest parity failed: {:?}", manifest.differences);
+    assert!(
+        manifest.passed,
+        "manifest parity failed: {:?}",
+        manifest.differences
+    );
 
     let repo = reference
         .split('@')
@@ -52,7 +60,9 @@ fn test_parity_cli_digest_manifest_ls() {
 
     // Error parity: missing image should fail similarly.
     let missing_ref = format!("{}/missing:tag", repo);
-    let go_crane = std::env::var("GO_CRANE_PATH").ok().unwrap_or_else(|| "crane".to_string());
+    let go_crane = std::env::var("GO_CRANE_PATH")
+        .ok()
+        .unwrap_or_else(|| "crane".to_string());
     let rust_crane = std::env::var("CRANE_RUST_PATH")
         .ok()
         .or_else(|| std::env::var("CARGO_BIN_EXE_crane").ok())

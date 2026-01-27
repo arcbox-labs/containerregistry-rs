@@ -3,8 +3,8 @@
 //! Provides utilities for tracking request counts, latencies, and errors.
 
 use std::collections::HashMap;
-use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::Arc;
+use std::sync::atomic::{AtomicU64, Ordering};
 use std::time::{Duration, Instant};
 
 /// Operation types for metrics tracking.
@@ -361,7 +361,10 @@ impl MetricsSummary {
                 "    latency: avg {:?}, min {:?}, max {:?}\n",
                 op.avg_latency, op.min_latency, op.max_latency
             ));
-            s.push_str(&format!("    success rate: {:.1}%\n", op.success_rate * 100.0));
+            s.push_str(&format!(
+                "    success rate: {:.1}%\n",
+                op.success_rate * 100.0
+            ));
             if op.bytes_downloaded > 0 || op.bytes_uploaded > 0 {
                 s.push_str(&format!(
                     "    bytes: {} up, {} down\n",

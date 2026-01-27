@@ -2,9 +2,9 @@
 
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
+use containerregistry_auth::Credential;
 use containerregistry_image::{Descriptor, Digest, ImageConfig, Manifest, MediaType, OciManifest};
 use containerregistry_registry::{Client, ClientConfig, Error, ManifestOrIndex, Reference};
-use containerregistry_auth::Credential;
 
 fn integration_enabled() -> bool {
     std::env::var("REGISTRY_INTEGRATION")
@@ -97,7 +97,13 @@ fn build_minimal_manifest() -> (Vec<u8>, Vec<u8>, Manifest, Digest, Digest) {
     let oci = OciManifest::new(config_desc, vec![layer_desc]);
     let manifest = Manifest::Oci(oci);
 
-    (config_bytes, layer_bytes, manifest, config_digest, layer_digest)
+    (
+        config_bytes,
+        layer_bytes,
+        manifest,
+        config_digest,
+        layer_digest,
+    )
 }
 
 // This test verifies that the anonymous registry is reachable and responds to /v2/.
@@ -194,9 +200,7 @@ async fn test_integration_get_manifest_by_digest() {
     client.put_blob(&tag_ref, &layer_bytes).await.unwrap();
     let manifest_digest = client.put_manifest(&tag_ref, &manifest).await.unwrap();
 
-    let digest_ref: Reference = format!("{addr}/{repo}@{manifest_digest}")
-        .parse()
-        .unwrap();
+    let digest_ref: Reference = format!("{addr}/{repo}@{manifest_digest}").parse().unwrap();
     let (got, got_digest) = client.get_manifest(&digest_ref).await.unwrap();
     assert!(got.is_manifest());
     assert_eq!(got_digest, manifest_digest);

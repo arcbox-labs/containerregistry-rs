@@ -14,8 +14,8 @@ use reqwest::{Client as HttpClient, RequestBuilder, Response, StatusCode};
 use serde::Deserialize;
 use tracing::{debug, instrument, trace, warn};
 
-use containerregistry_image::{Algorithm, Digest, ImageIndex, Manifest, MediaType};
 use containerregistry_auth::Credential;
+use containerregistry_image::{Algorithm, Digest, ImageIndex, Manifest, MediaType};
 
 use crate::metrics::{MetricsCollector, Operation};
 use crate::reference::Reference;
@@ -258,10 +258,10 @@ impl Client {
     }
 
     fn auth_header_value(&self) -> Option<String> {
-        if let Ok(guard) = self.bearer_token.read() {
-            if let Some(token) = guard.as_ref() {
-                return Some(format!("Bearer {}", token));
-            }
+        if let Ok(guard) = self.bearer_token.read()
+            && let Some(token) = guard.as_ref()
+        {
+            return Some(format!("Bearer {}", token));
         }
         self.credential
             .as_ref()
@@ -358,13 +358,9 @@ impl Client {
         let response = self
             .execute_with_retry_op(
                 || async {
-                    self.apply_auth(
-                        self.http
-                            .get(&url)
-                            .header(ACCEPT, accept_manifest_types()),
-                    )
-                    .send()
-                    .await
+                    self.apply_auth(self.http.get(&url).header(ACCEPT, accept_manifest_types()))
+                        .send()
+                        .await
                 },
                 Some(Operation::GetManifest),
             )
@@ -406,13 +402,9 @@ impl Client {
         let response = self
             .execute_with_retry_op(
                 || async {
-                    self.apply_auth(
-                        self.http
-                            .head(&url)
-                            .header(ACCEPT, accept_manifest_types()),
-                    )
-                    .send()
-                    .await
+                    self.apply_auth(self.http.head(&url).header(ACCEPT, accept_manifest_types()))
+                        .send()
+                        .await
                 },
                 Some(Operation::HeadManifest),
             )
@@ -876,7 +868,10 @@ impl Client {
                 self.record_failure(Operation::PutBlob, start);
                 return Err(Error::RateLimited {
                     retry_after: Self::parse_retry_after(response.headers()),
-                    message: format!("rate limited while initiating blob upload for {}", reference),
+                    message: format!(
+                        "rate limited while initiating blob upload for {}",
+                        reference
+                    ),
                 });
             }
             status => {
@@ -1010,7 +1005,10 @@ impl Client {
                 self.record_failure(Operation::PutBlob, start);
                 return Err(Error::RateLimited {
                     retry_after: Self::parse_retry_after(response.headers()),
-                    message: format!("rate limited while initiating blob upload for {}", reference),
+                    message: format!(
+                        "rate limited while initiating blob upload for {}",
+                        reference
+                    ),
                 });
             }
             status => {
@@ -1154,11 +1152,10 @@ impl Client {
         let url = self.url(reference.registry(), &path);
 
         let response = match self
-            .apply_auth(
-                self.http
-                    .post(&url)
-                    .query(&[("mount", digest.to_string()), ("from", from_repo.to_string())]),
-            )
+            .apply_auth(self.http.post(&url).query(&[
+                ("mount", digest.to_string()),
+                ("from", from_repo.to_string()),
+            ]))
             .send()
             .await
         {
@@ -1227,7 +1224,11 @@ impl Client {
     }
 
     /// Gets referrers for the given subject digest.
-    pub async fn get_referrers(&self, reference: &Reference, digest: &Digest) -> Result<ImageIndex> {
+    pub async fn get_referrers(
+        &self,
+        reference: &Reference,
+        digest: &Digest,
+    ) -> Result<ImageIndex> {
         let path = format!("/{}/referrers/{}", reference.repository(), digest);
         let url = self.url(reference.registry(), &path);
 
@@ -1282,10 +1283,8 @@ impl Client {
                     StatusCode::OK => {
                         let next_link = Self::parse_link_next(resp.headers())
                             .map(|link| self.resolve_link(reference.registry(), &link));
-                        let body: TagList = resp
-                            .json()
-                            .await
-                            .map_err(|e| self.map_transport_error(e))?;
+                        let body: TagList =
+                            resp.json().await.map_err(|e| self.map_transport_error(e))?;
                         // Handle null tags from some registries
                         tags.extend(body.tags.unwrap_or_default());
                         if let Some(next) = next_link {
@@ -1408,21 +1407,14 @@ impl Client {
         })
     }
 
-    fn parse_optional_digest_header(
-        headers: &HeaderMap,
-        status: u16,
-    ) -> Result<Option<Digest>> {
+    fn parse_optional_digest_header(headers: &HeaderMap, status: u16) -> Result<Option<Digest>> {
         match headers.get("docker-content-digest") {
             Some(value) => Ok(Some(Self::parse_digest_header_value(value, status)?)),
             None => Ok(None),
         }
     }
 
-    fn digest_for_algorithm(
-        algorithm: Algorithm,
-        data: &[u8],
-        computed_sha256: &Digest,
-    ) -> Digest {
+    fn digest_for_algorithm(algorithm: Algorithm, data: &[u8], computed_sha256: &Digest) -> Digest {
         match algorithm {
             Algorithm::Sha256 => computed_sha256.clone(),
             Algorithm::Sha384 => Digest::sha384(data),
@@ -1441,11 +1433,7 @@ impl Client {
     }
 
     /// Executes a request with retry logic for transient errors, tracking retries for the given operation.
-    async fn execute_with_retry_op<F, Fut>(
-        &self,
-        f: F,
-        op: Option<Operation>,
-    ) -> Result<Response>
+    async fn execute_with_retry_op<F, Fut>(&self, f: F, op: Option<Operation>) -> Result<Response>
     where
         F: Fn() -> Fut,
         Fut: std::future::Future<Output = std::result::Result<Response, reqwest::Error>>,
@@ -1468,7 +1456,9 @@ impl Client {
                                     if attempt == self.config.retries {
                                         return Ok(response);
                                     }
-                                    last_error = Some(Error::Unauthorized("bearer auth challenge".to_string()));
+                                    last_error = Some(Error::Unauthorized(
+                                        "bearer auth challenge".to_string(),
+                                    ));
                                     will_retry = true;
                                 }
                                 Err(_) => {
@@ -1537,7 +1527,11 @@ impl Client {
             if attempt < self.config.retries {
                 let delay =
                     delay_override.unwrap_or_else(|| Duration::from_millis(100 * (1 << attempt)));
-                trace!(attempt, delay_ms = delay.as_millis(), "backing off before retry");
+                trace!(
+                    attempt,
+                    delay_ms = delay.as_millis(),
+                    "backing off before retry"
+                );
                 tokio::time::sleep(delay).await;
             }
         }
@@ -1621,13 +1615,16 @@ impl Client {
         if let Some(scope) = &challenge.scope {
             request = request.query(&[("scope", scope)]);
         }
-        if let Some(cred) = &self.credential {
-            if let Some(header) = cred.authorization_header() {
-                request = request.header(AUTHORIZATION, header);
-            }
+        if let Some(cred) = &self.credential
+            && let Some(header) = cred.authorization_header()
+        {
+            request = request.header(AUTHORIZATION, header);
         }
 
-        let response = request.send().await.map_err(|e| self.map_transport_error(e))?;
+        let response = request
+            .send()
+            .await
+            .map_err(|e| self.map_transport_error(e))?;
         if !response.status().is_success() {
             return Err(Error::Unauthorized("token request failed".to_string()));
         }

@@ -8,7 +8,7 @@
 //! 5. Anonymous access
 
 use crate::config::DockerConfig;
-use crate::helper::{normalize_server_url, CredentialHelper};
+use crate::helper::{CredentialHelper, normalize_server_url};
 use crate::{Credential, Result};
 
 /// A resolver for container registry credentials.

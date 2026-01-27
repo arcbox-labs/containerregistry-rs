@@ -25,11 +25,8 @@ fn test_basic_auth_with_colon_in_password() {
 
     // Verify we can decode it back
     let encoded = header.strip_prefix("Basic ").unwrap();
-    let decoded = base64::Engine::decode(
-        &base64::engine::general_purpose::STANDARD,
-        encoded,
-    )
-    .unwrap();
+    let decoded =
+        base64::Engine::decode(&base64::engine::general_purpose::STANDARD, encoded).unwrap();
     let decoded_str = String::from_utf8(decoded).unwrap();
     assert_eq!(decoded_str, "user:pass:with:colons");
 }
@@ -60,10 +57,7 @@ fn test_basic_auth_with_empty_username() {
 fn test_bearer_token_header() {
     let cred = Credential::bearer("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.test");
     let header = cred.authorization_header().unwrap();
-    assert_eq!(
-        header,
-        "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.test"
-    );
+    assert_eq!(header, "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.test");
 }
 
 #[test]

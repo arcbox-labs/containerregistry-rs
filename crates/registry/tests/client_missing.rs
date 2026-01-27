@@ -142,7 +142,10 @@ async fn test_list_tags_pagination() {
     let client = Client::with_config(ClientConfig::new().with_https(false)).unwrap();
 
     let tags = client.list_tags(&reference).await.unwrap();
-    assert_eq!(tags, vec!["v1".to_string(), "v2".to_string(), "v3".to_string()]);
+    assert_eq!(
+        tags,
+        vec!["v1".to_string(), "v2".to_string(), "v3".to_string()]
+    );
 
     let _ = handle.join();
 }
@@ -162,12 +165,8 @@ async fn test_get_manifest_rate_limited_retry_after() {
 
     let (addr, handle) = serve_responses(vec![response]);
     let reference: Reference = format!("{}/repo:tag", addr).parse().unwrap();
-    let client = Client::with_config(
-        ClientConfig::new()
-            .with_https(false)
-            .with_retries(0),
-    )
-    .unwrap();
+    let client =
+        Client::with_config(ClientConfig::new().with_https(false).with_retries(0)).unwrap();
 
     let err = client.get_manifest(&reference).await.unwrap_err();
     match err {
@@ -198,7 +197,10 @@ async fn test_put_manifest_rate_limited_retry_after() {
     let client = Client::with_config(ClientConfig::new().with_https(false)).unwrap();
     let manifest = minimal_manifest();
 
-    let err = client.put_manifest(&reference, &manifest).await.unwrap_err();
+    let err = client
+        .put_manifest(&reference, &manifest)
+        .await
+        .unwrap_err();
     match err {
         Error::RateLimited { retry_after, .. } => {
             assert_eq!(retry_after, Some(Duration::from_secs(2)));
@@ -235,7 +237,7 @@ async fn test_get_manifest_digest_reference_mismatch() {
     );
 
     let (addr, handle) = serve_responses(vec![response]);
-    let reference: Reference = format!("{}/repo@{}", addr, expected_digest.to_string())
+    let reference: Reference = format!("{}/repo@{}", addr, expected_digest)
         .parse()
         .unwrap();
     let client = Client::with_config(ClientConfig::new().with_https(false)).unwrap();
@@ -361,7 +363,9 @@ async fn test_get_manifest_accepts_sha384_digest_reference() {
     );
 
     let (addr, handle) = serve_responses(vec![response]);
-    let reference: Reference = format!("{}/repo@{}", addr, expected_digest).parse().unwrap();
+    let reference: Reference = format!("{}/repo@{}", addr, expected_digest)
+        .parse()
+        .unwrap();
     let client = Client::with_config(ClientConfig::new().with_https(false)).unwrap();
 
     let (_manifest_or_index, parsed_digest) = client.get_manifest(&reference).await.unwrap();
@@ -392,7 +396,9 @@ async fn test_get_manifest_accepts_sha512_digest_reference() {
     );
 
     let (addr, handle) = serve_responses(vec![response]);
-    let reference: Reference = format!("{}/repo@{}", addr, expected_digest).parse().unwrap();
+    let reference: Reference = format!("{}/repo@{}", addr, expected_digest)
+        .parse()
+        .unwrap();
     let client = Client::with_config(ClientConfig::new().with_https(false)).unwrap();
 
     let (_manifest_or_index, parsed_digest) = client.get_manifest(&reference).await.unwrap();
@@ -530,7 +536,10 @@ async fn test_put_manifest_rejects_mismatched_digest_header() {
     let client = Client::with_config(ClientConfig::new().with_https(false)).unwrap();
     let manifest = minimal_manifest();
 
-    let err = client.put_manifest(&reference, &manifest).await.unwrap_err();
+    let err = client
+        .put_manifest(&reference, &manifest)
+        .await
+        .unwrap_err();
     match err {
         Error::DigestMismatch { .. } => {}
         other => panic!("expected DigestMismatch, got {:?}", other),
@@ -586,7 +595,9 @@ async fn test_put_manifest_accepts_sha384_digest_reference() {
     );
 
     let (addr, handle) = serve_responses(vec![response]);
-    let reference: Reference = format!("{}/repo@{}", addr, expected_digest).parse().unwrap();
+    let reference: Reference = format!("{}/repo@{}", addr, expected_digest)
+        .parse()
+        .unwrap();
     let client = Client::with_config(ClientConfig::new().with_https(false)).unwrap();
 
     let returned = client.put_manifest(&reference, &manifest).await.unwrap();
@@ -614,7 +625,9 @@ async fn test_put_index_accepts_sha512_digest_reference() {
     );
 
     let (addr, handle) = serve_responses(vec![response]);
-    let reference: Reference = format!("{}/repo@{}", addr, expected_digest).parse().unwrap();
+    let reference: Reference = format!("{}/repo@{}", addr, expected_digest)
+        .parse()
+        .unwrap();
     let client = Client::with_config(ClientConfig::new().with_https(false)).unwrap();
 
     let returned = client.put_index(&reference, &index).await.unwrap();
@@ -633,7 +646,10 @@ async fn test_put_manifest_rejects_sha384_digest_reference_mismatch() {
         .unwrap();
     let client = Client::with_config(ClientConfig::new().with_https(false)).unwrap();
 
-    let err = client.put_manifest(&reference, &manifest).await.unwrap_err();
+    let err = client
+        .put_manifest(&reference, &manifest)
+        .await
+        .unwrap_err();
     match err {
         Error::DigestMismatch { .. } => {}
         other => panic!("expected DigestMismatch, got {:?}", other),

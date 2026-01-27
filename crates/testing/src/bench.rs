@@ -132,7 +132,11 @@ impl Benchmark {
         self.compute_result(durations, total_duration)
     }
 
-    fn compute_result(&self, durations: Vec<Duration>, total_duration: Duration) -> BenchmarkResult {
+    fn compute_result(
+        &self,
+        durations: Vec<Duration>,
+        total_duration: Duration,
+    ) -> BenchmarkResult {
         let min_duration = *durations.iter().min().unwrap_or(&Duration::ZERO);
         let max_duration = *durations.iter().max().unwrap_or(&Duration::ZERO);
         let avg_duration = total_duration / self.iterations as u32;
@@ -285,12 +289,9 @@ mod tests {
 
     #[test]
     fn test_benchmark_run() {
-        let result = Benchmark::new("test")
-            .iterations(5)
-            .warmup(1)
-            .run(|| {
-                std::thread::sleep(Duration::from_millis(1));
-            });
+        let result = Benchmark::new("test").iterations(5).warmup(1).run(|| {
+            std::thread::sleep(Duration::from_millis(1));
+        });
 
         assert_eq!(result.iterations, 5);
         assert!(result.avg_duration >= Duration::from_millis(1));
@@ -311,9 +312,11 @@ mod tests {
         baseline.record("test", Duration::from_millis(100));
 
         // No regression
-        assert!(baseline
-            .check_regression("test", Duration::from_millis(105))
-            .is_none());
+        assert!(
+            baseline
+                .check_regression("test", Duration::from_millis(105))
+                .is_none()
+        );
 
         // Regression detected
         let report = baseline

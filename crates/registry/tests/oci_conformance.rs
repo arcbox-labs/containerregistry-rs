@@ -208,7 +208,11 @@ async fn oci_dist_003_push_manifest_with_digest() {
     // PUT /v2/<name>/manifests/<digest>
     let digest_ref: Reference = format!("{addr}/{repo}@{expected_digest}").parse().unwrap();
     let result = client.put_manifest(&digest_ref, &manifest).await;
-    assert!(result.is_ok(), "put_manifest by digest failed: {:?}", result);
+    assert!(
+        result.is_ok(),
+        "put_manifest by digest failed: {:?}",
+        result
+    );
     assert_eq!(result.unwrap(), expected_digest);
 }
 
@@ -424,8 +428,10 @@ async fn oci_dist_008_image_index() {
     let repo = unique_repo("image-index");
 
     // Create and push manifests for two platforms
-    let (amd64_manifest, amd64_digest) = push_platform_manifest(&client, &addr, &repo, "amd64", "linux").await;
-    let (arm64_manifest, arm64_digest) = push_platform_manifest(&client, &addr, &repo, "arm64", "linux").await;
+    let (amd64_manifest, amd64_digest) =
+        push_platform_manifest(&client, &addr, &repo, "amd64", "linux").await;
+    let (arm64_manifest, arm64_digest) =
+        push_platform_manifest(&client, &addr, &repo, "arm64", "linux").await;
 
     // Create image index
     let amd64_desc = Descriptor::new(

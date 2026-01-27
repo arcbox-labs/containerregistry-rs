@@ -66,9 +66,9 @@ impl CredentialHelper {
             })?;
         }
 
-        let output = child.wait_with_output().map_err(|e| {
-            Error::HelperFailure(format!("failed to read from {}: {}", binary, e))
-        })?;
+        let output = child
+            .wait_with_output()
+            .map_err(|e| Error::HelperFailure(format!("failed to read from {}: {}", binary, e)))?;
 
         if !output.status.success() {
             let stderr = String::from_utf8_lossy(&output.stderr);
@@ -155,14 +155,8 @@ mod tests {
 
     #[test]
     fn test_normalize_server_url() {
-        assert_eq!(
-            normalize_server_url("gcr.io"),
-            "https://gcr.io"
-        );
-        assert_eq!(
-            normalize_server_url("https://gcr.io"),
-            "https://gcr.io"
-        );
+        assert_eq!(normalize_server_url("gcr.io"), "https://gcr.io");
+        assert_eq!(normalize_server_url("https://gcr.io"), "https://gcr.io");
         assert_eq!(
             normalize_server_url("http://localhost:5000"),
             "http://localhost:5000"

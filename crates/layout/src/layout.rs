@@ -500,8 +500,12 @@ mod tests {
         let digest_384 = Digest::sha384(data_384);
         let digest_512 = Digest::sha512(data_512);
 
-        layout.write_blob_with_digest(data_384, &digest_384).unwrap();
-        layout.write_blob_with_digest(data_512, &digest_512).unwrap();
+        layout
+            .write_blob_with_digest(data_384, &digest_384)
+            .unwrap();
+        layout
+            .write_blob_with_digest(data_512, &digest_512)
+            .unwrap();
 
         assert!(layout.validate_blob(&digest_384).unwrap());
         assert!(layout.validate_blob(&digest_512).unwrap());
@@ -513,9 +517,7 @@ mod tests {
         let layout = Layout::create(dir.path()).unwrap();
         let digest = Digest::sha256(b"expected");
 
-        layout
-            .write_blob_with_digest(b"expected", &digest)
-            .unwrap();
+        layout.write_blob_with_digest(b"expected", &digest).unwrap();
 
         // Corrupt the blob content.
         let path = layout.blob_path(&digest);

@@ -65,7 +65,13 @@ fn build_minimal_manifest() -> (Vec<u8>, Vec<u8>, Manifest, Digest, Digest) {
     let oci = OciManifest::new(config_desc, vec![layer_desc]);
     let manifest = Manifest::Oci(oci);
 
-    (config_bytes, layer_bytes, manifest, config_digest, layer_digest)
+    (
+        config_bytes,
+        layer_bytes,
+        manifest,
+        config_digest,
+        layer_digest,
+    )
 }
 
 fn run_crane(args: &[&str]) -> std::process::Output {
@@ -107,14 +113,18 @@ async fn test_crane_commands_golden() {
 
     let output = run_crane(&["--insecure", "digest", "--full-ref", &image]);
     assert!(output.status.success());
-    let full = format!("{}/{}@{}", reference.registry(), reference.repository(), manifest_digest);
+    let full = format!(
+        "{}/{}@{}",
+        reference.registry(),
+        reference.repository(),
+        manifest_digest
+    );
     assert_eq!(String::from_utf8_lossy(&output.stdout).trim(), full);
 
     // manifest
     let output = run_crane(&["--insecure", "manifest", &image]);
     assert!(output.status.success());
-    let actual: serde_json::Value =
-        serde_json::from_slice(&output.stdout).expect("manifest json");
+    let actual: serde_json::Value = serde_json::from_slice(&output.stdout).expect("manifest json");
     let expected: serde_json::Value =
         serde_json::from_slice(&manifest.to_bytes().unwrap()).expect("expected manifest json");
     assert_eq!(actual, expected);

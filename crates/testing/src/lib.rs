@@ -13,5 +13,5 @@ pub mod parity;
 pub use bench::{Benchmark, BenchmarkResult, PerformanceBaseline};
 pub use fault::{Fault, FaultConfig, FaultInjectionServer};
 pub use fixture::{FixtureBuilder, LayerCompression, TestImage};
-pub use golden::{assert_digest_eq, assert_manifest_eq, GoldenComparator};
+pub use golden::{GoldenComparator, assert_digest_eq, assert_manifest_eq};
 pub use parity::ParityRunner;

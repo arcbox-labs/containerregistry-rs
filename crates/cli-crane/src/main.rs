@@ -116,7 +116,16 @@ async fn main() -> Result<()> {
             image,
             output,
             format,
-        } => cmd_pull(&client, &image, output.as_deref(), &format, platform.as_ref()).await,
+        } => {
+            cmd_pull(
+                &client,
+                &image,
+                output.as_deref(),
+                &format,
+                platform.as_ref(),
+            )
+            .await
+        }
         Commands::Push { image, input } => cmd_push(&client, &image, &input).await,
         Commands::Copy {
             source,
@@ -177,8 +186,8 @@ async fn cmd_digest(
     // If it's an index and platform is specified, find the matching manifest
     let final_digest = if let Some(index) = manifest_or_index.as_index() {
         if let Some(platform) = platform {
-            let matching = find_platform_in_index(index, platform)
-                .context("no matching platform in index")?;
+            let matching =
+                find_platform_in_index(index, platform).context("no matching platform in index")?;
             matching.digest.clone()
         } else {
             // Return the index digest
@@ -214,8 +223,8 @@ async fn cmd_manifest(client: &Client, image: &str, platform: Option<&Platform>)
     // If it's an index and platform is specified, get the specific manifest
     let output = if let Some(index) = manifest_or_index.as_index() {
         if let Some(platform) = platform {
-            let matching = find_platform_in_index(index, platform)
-                .context("no matching platform in index")?;
+            let matching =
+                find_platform_in_index(index, platform).context("no matching platform in index")?;
 
             // Fetch the actual manifest
             let manifest_ref = reference.clone().with_new_digest(matching.digest.clone());
@@ -273,8 +282,8 @@ async fn cmd_config(client: &Client, image: &str, platform: Option<&Platform>) -
     // Resolve to a manifest (handle multi-arch)
     let manifest = if let Some(index) = manifest_or_index.as_index() {
         if let Some(platform) = platform {
-            let matching = find_platform_in_index(index, platform)
-                .context("no matching platform in index")?;
+            let matching =
+                find_platform_in_index(index, platform).context("no matching platform in index")?;
 
             // Fetch the actual manifest
             let manifest_ref = reference.clone().with_new_digest(matching.digest.clone());
@@ -422,7 +431,9 @@ async fn cmd_copy(
     platform: Option<&Platform>,
 ) -> Result<()> {
     let src_ref: Reference = source.parse().context("invalid source reference")?;
-    let dst_ref: Reference = destination.parse().context("invalid destination reference")?;
+    let dst_ref: Reference = destination
+        .parse()
+        .context("invalid destination reference")?;
 
     let (manifest_or_index, _) = client
         .get_manifest(&src_ref)
@@ -553,8 +564,8 @@ fn push_index_from_layout<'a>(
                     ImageIndex::from_bytes(&manifest_bytes).context("failed to parse index")?;
                 push_index_from_layout(client, layout, &manifest_ref, &nested_index).await?;
             } else {
-                let manifest = Manifest::from_bytes(&manifest_bytes)
-                    .context("failed to parse manifest")?;
+                let manifest =
+                    Manifest::from_bytes(&manifest_bytes).context("failed to parse manifest")?;
                 push_manifest_from_layout(client, layout, &manifest_ref, &manifest).await?;
             }
         }
@@ -578,7 +589,9 @@ fn copy_index<'a>(
     Box::pin(async move {
         // Copy each manifest in the index
         for manifest_desc in index.manifests() {
-            let manifest_ref = src_ref.clone().with_new_digest(manifest_desc.digest.clone());
+            let manifest_ref = src_ref
+                .clone()
+                .with_new_digest(manifest_desc.digest.clone());
             let target_ref = dst_ref
                 .clone()
                 .with_new_digest(manifest_desc.digest.clone());

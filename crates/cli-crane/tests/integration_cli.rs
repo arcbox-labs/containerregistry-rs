@@ -76,11 +76,7 @@ fn build_manifest(os: &str, arch: &str) -> BuiltManifest {
 
     let layer_bytes = format!("layer-{os}-{arch}").into_bytes();
     let layer_digest = Digest::sha256(&layer_bytes);
-    let layer_desc = Descriptor::new(
-        MediaType::OciLayer,
-        layer_digest,
-        layer_bytes.len() as u64,
-    );
+    let layer_desc = Descriptor::new(MediaType::OciLayer, layer_digest, layer_bytes.len() as u64);
 
     let manifest = Manifest::Oci(OciManifest::new(config_desc, vec![layer_desc]));
     let digest = manifest.digest().expect("manifest digest");

@@ -86,7 +86,17 @@ async fn main() -> Result<()> {
             destination,
             recursive,
             jobs,
-        } => cmd_cp(&client, &source, &destination, recursive, jobs, platform.as_ref()).await,
+        } => {
+            cmd_cp(
+                &client,
+                &source,
+                &destination,
+                recursive,
+                jobs,
+                platform.as_ref(),
+            )
+            .await
+        }
         Commands::Ls { repository } => cmd_ls(&client, &repository).await,
         Commands::Gc { repository } => cmd_gc(&repository).await,
     }
@@ -133,7 +143,9 @@ async fn cmd_cp(
     platform: Option<&Platform>,
 ) -> Result<()> {
     let src_ref: Reference = source.parse().context("invalid source reference")?;
-    let dst_ref: Reference = destination.parse().context("invalid destination reference")?;
+    let dst_ref: Reference = destination
+        .parse()
+        .context("invalid destination reference")?;
 
     if recursive {
         // Copy all tags from source repository to destination
@@ -310,7 +322,9 @@ fn copy_index<'a>(
     Box::pin(async move {
         // Copy each manifest in the index
         for manifest_desc in index.manifests() {
-            let manifest_ref = src_ref.clone().with_new_digest(manifest_desc.digest.clone());
+            let manifest_ref = src_ref
+                .clone()
+                .with_new_digest(manifest_desc.digest.clone());
             let (inner, _) = client
                 .get_manifest(&manifest_ref)
                 .await
@@ -354,8 +368,5 @@ async fn cmd_ls(client: &Client, repository: &str) -> Result<()> {
 
 /// Garbage collect unreferenced blobs.
 async fn cmd_gc(repository: &str) -> Result<()> {
-    anyhow::bail!(
-        "gc not yet implemented for repository {}",
-        repository
-    );
+    anyhow::bail!("gc not yet implemented for repository {}", repository);
 }

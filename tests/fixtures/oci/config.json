@@ -1,0 +1,28 @@
+{
+  "architecture": "amd64",
+  "os": "linux",
+  "config": {
+    "Env": [
+      "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+    ],
+    "Entrypoint": [
+      "/bin/sh"
+    ],
+    "WorkingDir": "/app",
+    "Labels": {
+      "org.opencontainers.image.title": "test-image",
+      "org.opencontainers.image.version": "1.0.0"
+    }
+  },
+  "rootfs": {
+    "type": "layers",
+    "diff_ids": [
+      "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    ]
+  },
+  "history": [
+    {
+      "created_by": "ADD file:empty /"
+    }
+  ]
+}

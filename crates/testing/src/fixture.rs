@@ -241,8 +241,8 @@ pub fn create_test_index(
         let digest = Digest::sha256(&manifest_bytes);
         let size = manifest_bytes.len() as u64;
 
-        let desc =
-            Descriptor::new(MediaType::OciManifest, digest.clone(), size).with_platform(platform.clone());
+        let desc = Descriptor::new(MediaType::OciManifest, digest.clone(), size)
+            .with_platform(platform.clone());
 
         manifests.push(desc);
 

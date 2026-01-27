@@ -73,7 +73,10 @@ async fn test_bearer_auth_flow() {
                     let body = r#"{"token":"token123"}"#;
                     let response = http_response(
                         "200 OK",
-                        vec![("Content-Type", "application/json".into()), ("Content-Length", body.len().to_string())],
+                        vec![
+                            ("Content-Type", "application/json".into()),
+                            ("Content-Length", body.len().to_string()),
+                        ],
                         body,
                     );
                     let _ = stream.write_all(response.as_bytes());
@@ -91,7 +94,10 @@ async fn test_bearer_auth_flow() {
                         let response = http_response(
                             "200 OK",
                             vec![
-                                ("Content-Type", "application/vnd.oci.image.manifest.v1+json".into()),
+                                (
+                                    "Content-Type",
+                                    "application/vnd.oci.image.manifest.v1+json".into(),
+                                ),
                                 ("Docker-Content-Digest", digest.to_string()),
                                 ("Content-Length", body.len().to_string()),
                             ],
@@ -117,14 +123,16 @@ async fn test_bearer_auth_flow() {
                     continue;
                 }
 
-                let response = http_response("404 Not Found", vec![("Content-Length", "0".into())], "");
+                let response =
+                    http_response("404 Not Found", vec![("Content-Length", "0".into())], "");
                 let _ = stream.write_all(response.as_bytes());
             }
         }
     });
 
     let reference: Reference = format!("{}/repo:latest", addr).parse().unwrap();
-    let client = Client::with_config(ClientConfig::new().with_https(false).with_retries(1)).unwrap();
+    let client =
+        Client::with_config(ClientConfig::new().with_https(false).with_retries(1)).unwrap();
 
     let result = client.get_manifest(&reference).await;
     assert!(result.is_ok(), "expected bearer auth flow to succeed");

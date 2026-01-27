@@ -112,9 +112,7 @@ impl ParityRunner {
             .ok_or("Rust crane not available")?;
 
         if go_crane == rust_crane {
-            return Err(
-                "Rust crane path matches Go crane path; set CRANE_RUST_PATH".to_string(),
-            );
+            return Err("Rust crane path matches Go crane path; set CRANE_RUST_PATH".to_string());
         }
 
         let go_output = run_cli(go_crane, args)?;
@@ -395,16 +393,11 @@ pub fn compare_layouts_with_options(
                         if Digest::compute(expected_digest.algorithm(), &act_bytes)
                             != expected_digest
                         {
-                            differences.push(format!(
-                                "Actual blob digest mismatch for {}:{}",
-                                alg, file
-                            ));
+                            differences
+                                .push(format!("Actual blob digest mismatch for {}:{}", alg, file));
                         }
                     } else {
-                        differences.push(format!(
-                            "Invalid digest filename for {}:{}",
-                            alg, file
-                        ));
+                        differences.push(format!("Invalid digest filename for {}:{}", alg, file));
                     }
                 }
             }
@@ -560,11 +553,7 @@ mod tests {
             &[(Algorithm::Sha256, &digest, expected_data)],
         )
         .unwrap();
-        write_layout(
-            actual.path(),
-            &[(Algorithm::Sha256, &digest, b"actual")],
-        )
-        .unwrap();
+        write_layout(actual.path(), &[(Algorithm::Sha256, &digest, b"actual")]).unwrap();
 
         let options = LayoutCompareOptions {
             verify_content: true,
@@ -572,7 +561,8 @@ mod tests {
         };
         let diffs = compare_layouts_with_options(expected.path(), actual.path(), &options).unwrap();
         assert!(
-            diffs.iter()
+            diffs
+                .iter()
                 .any(|diff| diff.contains("Actual blob digest mismatch")),
             "expected digest mismatch, got {:?}",
             diffs

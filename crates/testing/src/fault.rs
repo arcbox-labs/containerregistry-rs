@@ -5,8 +5,8 @@
 
 use std::collections::HashMap;
 use std::net::SocketAddr;
-use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
+use std::sync::atomic::{AtomicUsize, Ordering};
 use std::time::Duration;
 
 use sha2::{Digest as Sha2Digest, Sha256};
@@ -32,20 +32,15 @@ pub enum Fault {
 }
 
 /// Controls how Docker-Content-Digest headers are emitted.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub enum DigestBehavior {
     /// Compute and return the correct digest.
+    #[default]
     Correct,
     /// Return an intentionally incorrect digest.
     Wrong(String),
     /// Omit the digest header entirely.
     Omit,
-}
-
-impl Default for DigestBehavior {
-    fn default() -> Self {
-        Self::Correct
-    }
 }
 
 /// Configuration for fault injection.
@@ -248,10 +243,7 @@ async fn handle_connection(
 
     match fault {
         Fault::HttpError(status) => {
-            let response = format!(
-                "HTTP/1.1 {} Error\r\nContent-Length: 0\r\n\r\n",
-                status
-            );
+            let response = format!("HTTP/1.1 {} Error\r\nContent-Length: 0\r\n\r\n", status);
             stream.write_all(response.as_bytes()).await?;
         }
         Fault::ConnectionReset => {
@@ -336,16 +328,10 @@ async fn send_success_response(
                 );
                 match digest_behavior {
                     DigestBehavior::Correct => {
-                        response.push_str(&format!(
-                            "Docker-Content-Digest: sha256:{}\r\n",
-                            digest
-                        ));
+                        response.push_str(&format!("Docker-Content-Digest: sha256:{}\r\n", digest));
                     }
                     DigestBehavior::Wrong(bad_digest) => {
-                        response.push_str(&format!(
-                            "Docker-Content-Digest: {}\r\n",
-                            bad_digest
-                        ));
+                        response.push_str(&format!("Docker-Content-Digest: {}\r\n", bad_digest));
                     }
                     DigestBehavior::Omit => {}
                 }
@@ -430,9 +416,7 @@ mod tests {
         let server = FaultInjectionServer::new(FaultConfig::always_succeed())
             .await
             .unwrap();
-        server
-            .add_manifest("test", b"{}".to_vec())
-            .await;
+        server.add_manifest("test", b"{}".to_vec()).await;
         server
             .set_manifest_digest_behavior(DigestBehavior::Omit)
             .await;
@@ -444,7 +428,9 @@ mod tests {
 
         let response = fetch_raw_response(addr, "/v2/repo/manifests/test").await;
         assert!(
-            !response.to_ascii_lowercase().contains("docker-content-digest"),
+            !response
+                .to_ascii_lowercase()
+                .contains("docker-content-digest"),
             "expected digest header to be omitted"
         );
 
@@ -456,13 +442,9 @@ mod tests {
         let server = FaultInjectionServer::new(FaultConfig::always_succeed())
             .await
             .unwrap();
+        server.add_manifest("test", b"{}".to_vec()).await;
         server
-            .add_manifest("test", b"{}".to_vec())
-            .await;
-        server
-            .set_manifest_digest_behavior(DigestBehavior::Wrong(
-                "sha256:badbadbad".to_string(),
-            ))
+            .set_manifest_digest_behavior(DigestBehavior::Wrong("sha256:badbadbad".to_string()))
             .await;
 
         let addr = server.addr();
@@ -510,11 +492,8 @@ mod tests {
             server.handle_one().await.unwrap();
         });
 
-        let result = tokio::time::timeout(
-            Duration::from_millis(50),
-            fetch_raw_response(addr, "/v2/"),
-        )
-        .await;
+        let result =
+            tokio::time::timeout(Duration::from_millis(50), fetch_raw_response(addr, "/v2/")).await;
         assert!(result.is_err(), "expected timeout");
         handle.abort();
         let _ = handle.await;

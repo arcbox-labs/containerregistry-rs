@@ -80,7 +80,13 @@ fn read_request(stream: &mut TcpStream) -> RecordedRequest {
     }
 }
 
-fn serve_requests(responses: Vec<String>) -> (String, Arc<Mutex<Vec<RecordedRequest>>>, thread::JoinHandle<()>) {
+fn serve_requests(
+    responses: Vec<String>,
+) -> (
+    String,
+    Arc<Mutex<Vec<RecordedRequest>>>,
+    thread::JoinHandle<()>,
+) {
     let listener = TcpListener::bind("127.0.0.1:0").expect("bind test server");
     let addr = listener.local_addr().expect("server addr");
     let recorded: Arc<Mutex<Vec<RecordedRequest>>> = Arc::new(Mutex::new(Vec::new()));
@@ -120,26 +126,17 @@ async fn test_put_blob_chunked_sequence() {
         ),
         http_response(
             "202 Accepted",
-            vec![
-                ("Range", "0-9".into()),
-                ("Content-Length", "0".into()),
-            ],
+            vec![("Range", "0-9".into()), ("Content-Length", "0".into())],
             "",
         ),
         http_response(
             "202 Accepted",
-            vec![
-                ("Range", "0-19".into()),
-                ("Content-Length", "0".into()),
-            ],
+            vec![("Range", "0-19".into()), ("Content-Length", "0".into())],
             "",
         ),
         http_response(
             "202 Accepted",
-            vec![
-                ("Range", "0-25".into()),
-                ("Content-Length", "0".into()),
-            ],
+            vec![("Range", "0-25".into()), ("Content-Length", "0".into())],
             "",
         ),
         http_response("201 Created", vec![("Content-Length", "0".into())], ""),
@@ -150,10 +147,7 @@ async fn test_put_blob_chunked_sequence() {
     let client = Client::with_config(ClientConfig::new().with_https(false)).unwrap();
 
     let data = b"abcdefghijklmnopqrstuvwxyz";
-    let digest = client
-        .put_blob_chunked(&reference, data, 10)
-        .await
-        .unwrap();
+    let digest = client.put_blob_chunked(&reference, data, 10).await.unwrap();
     assert_eq!(digest, Digest::sha256(data));
 
     let _ = handle.join();
@@ -162,24 +156,35 @@ async fn test_put_blob_chunked_sequence() {
     assert_eq!(requests[0].method, "POST");
     assert!(requests[0].path.contains("/v2/repo/blobs/uploads/"));
     assert_eq!(requests[1].method, "PATCH");
-    assert_eq!(requests[1].headers.get("content-range"), Some(&"0-9".to_string()));
-    assert_eq!(requests[2].headers.get("content-range"), Some(&"10-19".to_string()));
-    assert_eq!(requests[3].headers.get("content-range"), Some(&"20-25".to_string()));
+    assert_eq!(
+        requests[1].headers.get("content-range"),
+        Some(&"0-9".to_string())
+    );
+    assert_eq!(
+        requests[2].headers.get("content-range"),
+        Some(&"10-19".to_string())
+    );
+    assert_eq!(
+        requests[3].headers.get("content-range"),
+        Some(&"20-25".to_string())
+    );
     assert_eq!(requests[4].method, "PUT");
 }
 
 #[tokio::test]
 async fn test_mount_blob_success() {
-    let digest: Digest =
-        "sha256:1111111111111111111111111111111111111111111111111111111111111111"
-            .parse()
-            .unwrap();
+    let digest: Digest = "sha256:1111111111111111111111111111111111111111111111111111111111111111"
+        .parse()
+        .unwrap();
     let response = http_response("201 Created", vec![("Content-Length", "0".into())], "");
     let (addr, recorded, handle) = serve_requests(vec![response]);
     let reference: Reference = format!("{}/repo:tag", addr).parse().unwrap();
     let client = Client::with_config(ClientConfig::new().with_https(false)).unwrap();
 
-    let mounted = client.mount_blob(&reference, "other/repo", &digest).await.unwrap();
+    let mounted = client
+        .mount_blob(&reference, "other/repo", &digest)
+        .await
+        .unwrap();
     assert!(mounted);
 
     let _ = handle.join();
@@ -195,16 +200,18 @@ async fn test_mount_blob_success() {
 
 #[tokio::test]
 async fn test_mount_blob_fallback_to_upload() {
-    let digest: Digest =
-        "sha256:2222222222222222222222222222222222222222222222222222222222222222"
-            .parse()
-            .unwrap();
+    let digest: Digest = "sha256:2222222222222222222222222222222222222222222222222222222222222222"
+        .parse()
+        .unwrap();
     let response = http_response("202 Accepted", vec![("Content-Length", "0".into())], "");
     let (addr, _recorded, handle) = serve_requests(vec![response]);
     let reference: Reference = format!("{}/repo:tag", addr).parse().unwrap();
     let client = Client::with_config(ClientConfig::new().with_https(false)).unwrap();
 
-    let mounted = client.mount_blob(&reference, "other/repo", &digest).await.unwrap();
+    let mounted = client
+        .mount_blob(&reference, "other/repo", &digest)
+        .await
+        .unwrap();
     assert!(!mounted);
 
     let _ = handle.join();
@@ -228,10 +235,9 @@ async fn test_delete_manifest() {
 
 #[tokio::test]
 async fn test_delete_blob() {
-    let digest: Digest =
-        "sha256:3333333333333333333333333333333333333333333333333333333333333333"
-            .parse()
-            .unwrap();
+    let digest: Digest = "sha256:3333333333333333333333333333333333333333333333333333333333333333"
+        .parse()
+        .unwrap();
     let response = http_response("202 Accepted", vec![("Content-Length", "0".into())], "");
     let (addr, recorded, handle) = serve_requests(vec![response]);
     let reference: Reference = format!("{}/repo:tag", addr).parse().unwrap();
@@ -248,15 +254,17 @@ async fn test_delete_blob() {
 
 #[tokio::test]
 async fn test_get_referrers() {
-    let digest: Digest =
-        "sha256:4444444444444444444444444444444444444444444444444444444444444444"
-            .parse()
-            .unwrap();
+    let digest: Digest = "sha256:4444444444444444444444444444444444444444444444444444444444444444"
+        .parse()
+        .unwrap();
     let body = r#"{"schemaVersion":2,"mediaType":"application/vnd.oci.image.index.v1+json","manifests":[]}"#;
     let response = http_response(
         "200 OK",
         vec![
-            ("Content-Type", "application/vnd.oci.image.index.v1+json".into()),
+            (
+                "Content-Type",
+                "application/vnd.oci.image.index.v1+json".into(),
+            ),
             ("Content-Length", body.len().to_string()),
         ],
         body,
@@ -266,7 +274,10 @@ async fn test_get_referrers() {
     let client = Client::with_config(ClientConfig::new().with_https(false)).unwrap();
 
     let index: ImageIndex = client.get_referrers(&reference, &digest).await.unwrap();
-    assert_eq!(index.media_type().as_str(), "application/vnd.oci.image.index.v1+json");
+    assert_eq!(
+        index.media_type().as_str(),
+        "application/vnd.oci.image.index.v1+json"
+    );
 
     let _ = handle.join();
 }
