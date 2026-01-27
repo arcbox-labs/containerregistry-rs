@@ -1,0 +1,22 @@
+[package]
+name = "gcrane"
+description = "CLI tool for GCR-specific container registry operations"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[[bin]]
+name = "gcrane"
+path = "src/main.rs"
+
+[dependencies]
+containerregistry-image.workspace = true
+containerregistry-layout.workspace = true
+containerregistry-registry.workspace = true
+containerregistry-auth.workspace = true
+clap.workspace = true
+tokio.workspace = true
+anyhow.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true

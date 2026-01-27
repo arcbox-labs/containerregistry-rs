@@ -1,0 +1,21 @@
+[package]
+name = "containerregistry-testing"
+description = "Test fixtures and parity testing utilities"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+containerregistry-image.workspace = true
+containerregistry-layout.workspace = true
+containerregistry-registry.workspace = true
+containerregistry-auth.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+tempfile.workspace = true
+tokio.workspace = true
+flate2.workspace = true
+zstd.workspace = true
+sha2.workspace = true
+hex.workspace = true
