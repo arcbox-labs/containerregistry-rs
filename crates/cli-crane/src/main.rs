@@ -142,9 +142,9 @@ async fn main() -> Result<()> {
 fn parse_platform(s: &str) -> Result<Platform> {
     let parts: Vec<&str> = s.split('/').collect();
     match parts.as_slice() {
-        [os, arch] => Ok(Platform::new(os.to_string(), arch.to_string())),
+        [os, arch] => Ok(Platform::new(arch.to_string(), os.to_string())),
         [os, arch, variant] => {
-            let mut p = Platform::new(os.to_string(), arch.to_string());
+            let mut p = Platform::new(arch.to_string(), os.to_string());
             p.variant = Some(variant.to_string());
             Ok(p)
         }
@@ -415,7 +415,20 @@ async fn cmd_push(client: &Client, image: &str, input: &str) -> Result<()> {
         anyhow::bail!("no manifests in layout index");
     }
 
-    let digest = push_index_from_layout(client, &layout, &reference, &index).await?;
+    // If the layout has a single non-index manifest, push it directly
+    // (matching crane behavior for single-image layouts).
+    let digest = if index.manifests().len() == 1 && !index.manifests()[0].media_type.is_index() {
+        let desc = &index.manifests()[0];
+        let manifest_bytes = layout
+            .read_blob(&desc.digest)
+            .context("failed to read manifest")?;
+        let manifest =
+            Manifest::from_bytes(&manifest_bytes).context("failed to parse manifest")?;
+        push_manifest_from_layout(client, &layout, &reference, &manifest).await?;
+        Digest::sha256(&manifest.to_bytes()?)
+    } else {
+        push_index_from_layout(client, &layout, &reference, &index).await?
+    };
 
     eprintln!("Pushed {} ({})", image, digest);
     println!("{}", digest);

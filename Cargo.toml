@@ -18,11 +18,11 @@ repository = "https://github.com/arcbox-labs/containerregistry-rs"
 
 [workspace.dependencies]
 # Workspace crates
-containerregistry-image = { path = "crates/image" }
-containerregistry-layout = { path = "crates/layout" }
-containerregistry-registry = { path = "crates/registry" }
-containerregistry-auth = { path = "crates/auth" }
-containerregistry-testing = { path = "crates/testing" }
+containerregistry-image = { version = "0.1.0", path = "crates/image" }
+containerregistry-layout = { version = "0.1.0", path = "crates/layout" }
+containerregistry-registry = { version = "0.1.0", path = "crates/registry" }
+containerregistry-auth = { version = "0.1.0", path = "crates/auth" }
+containerregistry-testing = { version = "0.1.0", path = "crates/testing" }
 
 # Serialization
 serde = { version = "1", features = ["derive"] }

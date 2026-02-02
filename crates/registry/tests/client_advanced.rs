@@ -105,6 +105,7 @@ fn serve_requests(
 
 fn http_response(status: &str, headers: Vec<(&str, String)>, body: &str) -> String {
     let mut resp = format!("HTTP/1.1 {}\r\n", status);
+    resp.push_str("Connection: close\r\n");
     for (k, v) in headers {
         resp.push_str(&format!("{}: {}\r\n", k, v));
     }

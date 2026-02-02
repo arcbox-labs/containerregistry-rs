@@ -106,9 +106,9 @@ async fn main() -> Result<()> {
 fn parse_platform(s: &str) -> Result<Platform> {
     let parts: Vec<&str> = s.split('/').collect();
     match parts.as_slice() {
-        [os, arch] => Ok(Platform::new(os.to_string(), arch.to_string())),
+        [os, arch] => Ok(Platform::new(arch.to_string(), os.to_string())),
         [os, arch, variant] => {
-            let mut p = Platform::new(os.to_string(), arch.to_string());
+            let mut p = Platform::new(arch.to_string(), os.to_string());
             p.variant = Some(variant.to_string());
             Ok(p)
         }

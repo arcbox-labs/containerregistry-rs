@@ -214,7 +214,8 @@ async fn test_integration_basic_auth_requires_auth() {
         return;
     }
     let addr = basic_registry_addr();
-    wait_for_registry(&addr).await;
+    // Wait using authenticated client since anonymous ping always returns 401
+    wait_for_registry_with_basic(&addr).await;
 
     let err = client().ping(&addr).await.unwrap_err();
     match err {
