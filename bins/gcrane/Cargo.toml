@@ -1,5 +1,5 @@
 [package]
-name = "gcrane"
+name = "containerregistry-gcrane"
 description = "CLI tool for GCR-specific container registry operations"
 version.workspace = true
 edition.workspace = true

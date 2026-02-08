@@ -1,5 +1,5 @@
 [package]
-name = "crane"
+name = "containerregistry-crane"
 description = "CLI tool for interacting with container registries"
 version.workspace = true
 edition.workspace = true

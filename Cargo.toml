@@ -7,8 +7,8 @@ members = [
     "crates/registry",
     "crates/auth",
     "crates/testing",
-    "crates/cli-crane",
-    "crates/cli-gcrane",
+    "bins/crane",
+    "bins/gcrane",
 ]
 
 [package]

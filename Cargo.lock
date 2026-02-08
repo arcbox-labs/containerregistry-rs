@@ -198,6 +198,38 @@ dependencies = [
 ]
 
 [[package]]
+name = "containerregistry-crane"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "clap",
+ "containerregistry-auth",
+ "containerregistry-image",
+ "containerregistry-layout",
+ "containerregistry-registry",
+ "serde_json",
+ "tempfile",
+ "tokio",
+ "tracing",
+ "tracing-subscriber",
+]
+
+[[package]]
+name = "containerregistry-gcrane"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "clap",
+ "containerregistry-auth",
+ "containerregistry-image",
+ "containerregistry-layout",
+ "containerregistry-registry",
+ "tokio",
+ "tracing",
+ "tracing-subscriber",
+]
+
+[[package]]
 name = "containerregistry-image"
 version = "0.1.0"
 dependencies = [
@@ -279,23 +311,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "59ed5838eebb26a2bb2e58f6d5b5316989ae9d08bab10e0e6d103e656d1b0280"
 dependencies = [
  "libc",
-]
-
-[[package]]
-name = "crane"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "clap",
- "containerregistry-auth",
- "containerregistry-image",
- "containerregistry-layout",
- "containerregistry-registry",
- "serde_json",
- "tempfile",
- "tokio",
- "tracing",
- "tracing-subscriber",
 ]
 
 [[package]]
@@ -474,21 +489,6 @@ dependencies = [
  "pin-project-lite",
  "pin-utils",
  "slab",
-]
-
-[[package]]
-name = "gcrane"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "clap",
- "containerregistry-auth",
- "containerregistry-image",
- "containerregistry-layout",
- "containerregistry-registry",
- "tokio",
- "tracing",
- "tracing-subscriber",
 ]
 
 [[package]]
