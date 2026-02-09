@@ -422,8 +422,7 @@ async fn cmd_push(client: &Client, image: &str, input: &str) -> Result<()> {
         let manifest_bytes = layout
             .read_blob(&desc.digest)
             .context("failed to read manifest")?;
-        let manifest =
-            Manifest::from_bytes(&manifest_bytes).context("failed to parse manifest")?;
+        let manifest = Manifest::from_bytes(&manifest_bytes).context("failed to parse manifest")?;
         push_manifest_from_layout(client, &layout, &reference, &manifest).await?;
         Digest::sha256(&manifest.to_bytes()?)
     } else {
