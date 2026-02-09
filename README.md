@@ -13,22 +13,23 @@ A Rust implementation of [go-containerregistry](https://github.com/google/go-con
 
 ## Crates
 
-| Crate | Description |
-|-------|-------------|
-| `containerregistry-image` | Core types: `Manifest`, `ImageIndex`, `Descriptor`, `Digest`, `MediaType`, `Platform` |
-| `containerregistry-registry` | HTTP registry client, reference parsing, retry logic, metrics |
-| `containerregistry-auth` | Credential resolution: Docker config, credential helpers, bearer/basic auth |
-| `containerregistry-layout` | OCI image layout read/write |
-| `crane` | crane-compatible CLI (digest, manifest, pull, push, copy, ls, catalog) |
-| `gcrane` | gcrane-compatible CLI (cp, ls, gc) |
-| `containerregistry-testing` | Test harness: fixtures, golden comparators, parity runner, fault injection |
+| Package | Path | Description |
+|---------|------|-------------|
+| `containerregistry` | `.` | Facade crate re-exporting all library crates |
+| `containerregistry-image` | `crates/image` | Core types: `Manifest`, `ImageIndex`, `Descriptor`, `Digest`, `MediaType`, `Platform` |
+| `containerregistry-registry` | `crates/registry` | HTTP registry client, reference parsing, retry logic, metrics |
+| `containerregistry-auth` | `crates/auth` | Credential resolution: Docker config, credential helpers, bearer/basic auth |
+| `containerregistry-layout` | `crates/layout` | OCI image layout read/write |
+| `containerregistry-crane` | `bins/crane` | crane-compatible CLI (digest, manifest, pull, push, copy, ls) |
+| `containerregistry-gcrane` | `bins/gcrane` | gcrane-compatible CLI (cp, ls) |
+| `containerregistry-testing` | `crates/testing` | Test harness: fixtures, golden comparators, parity runner, fault injection |
 
 ## Quick Start
 
 ### As a library
 
 ```rust
-use containerregistry_registry::{Client, ClientConfig, Reference};
+use containerregistry::registry::{Client, Reference};
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
