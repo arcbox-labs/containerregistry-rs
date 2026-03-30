@@ -2,9 +2,20 @@
 
 use std::collections::BTreeMap;
 
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Deserializer, Serialize};
 
 use crate::{Digest, Error, Result};
+
+/// Deserialize a value that may be JSON `null`, treating null as T::default().
+/// Docker/OCI configs frequently contain `"Volumes": null` or `"Labels": null`
+/// instead of omitting the field or using an empty object/array.
+fn null_as_default<'de, D, T>(deserializer: D) -> std::result::Result<T, D::Error>
+where
+    D: Deserializer<'de>,
+    T: Default + Deserialize<'de>,
+{
+    Option::<T>::deserialize(deserializer).map(|v| v.unwrap_or_default())
+}
 
 /// OCI image configuration.
 ///
@@ -23,7 +34,7 @@ pub struct ImageConfig {
     pub os_version: Option<String>,
 
     /// Optional OS features required by the image.
-    #[serde(default, rename = "os.features", skip_serializing_if = "Vec::is_empty")]
+    #[serde(default, rename = "os.features", skip_serializing_if = "Vec::is_empty", deserialize_with = "null_as_default")]
     pub os_features: Vec<String>,
 
     /// Optional architecture variant.
@@ -38,7 +49,7 @@ pub struct ImageConfig {
     pub rootfs: RootFs,
 
     /// Build history.
-    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    #[serde(default, skip_serializing_if = "Vec::is_empty", deserialize_with = "null_as_default")]
     pub history: Vec<History>,
 
     /// Creation timestamp (RFC 3339).
@@ -59,7 +70,7 @@ pub struct EmptyObject {}
 #[serde(rename_all = "PascalCase")]
 pub struct Healthcheck {
     /// The test to perform (CMD or CMD-SHELL).
-    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    #[serde(default, skip_serializing_if = "Vec::is_empty", deserialize_with = "null_as_default")]
     pub test: Vec<String>,
 
     /// Interval between health checks (nanoseconds).
@@ -100,11 +111,11 @@ pub struct ContainerConfig {
     pub user: Option<String>,
 
     /// Exposed ports.
-    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty", deserialize_with = "null_as_default")]
     pub exposed_ports: BTreeMap<String, EmptyObject>,
 
     /// Environment variables.
-    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    #[serde(default, skip_serializing_if = "Vec::is_empty", deserialize_with = "null_as_default")]
     pub env: Vec<String>,
 
     /// Entrypoint command.
@@ -116,7 +127,7 @@ pub struct ContainerConfig {
     pub cmd: Option<Vec<String>>,
 
     /// Volumes.
-    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty", deserialize_with = "null_as_default")]
     pub volumes: BTreeMap<String, EmptyObject>,
 
     /// Working directory.
@@ -124,7 +135,7 @@ pub struct ContainerConfig {
     pub working_dir: Option<String>,
 
     /// Labels.
-    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty", deserialize_with = "null_as_default")]
     pub labels: BTreeMap<String, String>,
 
     /// Stop signal.
@@ -136,7 +147,7 @@ pub struct ContainerConfig {
     pub healthcheck: Option<Healthcheck>,
 
     /// Dockerfile ONBUILD triggers.
-    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    #[serde(default, skip_serializing_if = "Vec::is_empty", deserialize_with = "null_as_default")]
     pub on_build: Vec<String>,
 
     /// Shell for shell-form RUN commands.
