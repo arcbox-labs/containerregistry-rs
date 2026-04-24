@@ -27,7 +27,7 @@ containerregistry-registry.workspace = true
 containerregistry-auth.workspace = true
 
 [workspace.package]
-version = "0.1.1"
+version = "0.1.2"
 edition = "2024"
 license = "MIT OR Apache-2.0"
 authors = ["ArcBox Labs <oss@arcbox.dev>", "AprilNEA <dev@aprilnea.me>"]
@@ -35,11 +35,11 @@ repository = "https://github.com/arcbox-labs/containerregistry-rs"
 
 [workspace.dependencies]
 # Workspace crates
-containerregistry-image = { version = "0.1.1", path = "crates/image" }
-containerregistry-layout = { version = "0.1.1", path = "crates/layout" }
-containerregistry-registry = { version = "0.1.1", path = "crates/registry" }
-containerregistry-auth = { version = "0.1.1", path = "crates/auth" }
-containerregistry-testing = { version = "0.1.1", path = "crates/testing" }
+containerregistry-image = { version = "0.1.2", path = "crates/image" }
+containerregistry-layout = { version = "0.1.2", path = "crates/layout" }
+containerregistry-registry = { version = "0.1.2", path = "crates/registry" }
+containerregistry-auth = { version = "0.1.2", path = "crates/auth" }
+containerregistry-testing = { version = "0.1.2", path = "crates/testing" }
 
 # Serialization
 serde = { version = "1", features = ["derive"] }
