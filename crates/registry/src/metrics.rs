@@ -115,11 +115,10 @@ impl OperationMetrics {
     pub fn avg_latency(&self) -> Duration {
         let total = self.total_latency_us.load(Ordering::Relaxed);
         let count = self.requests.load(Ordering::Relaxed);
-        if count == 0 {
-            Duration::ZERO
-        } else {
-            Duration::from_micros(total / count)
-        }
+        total
+            .checked_div(count)
+            .map(Duration::from_micros)
+            .unwrap_or(Duration::ZERO)
     }
 
     /// Returns the minimum latency.

@@ -259,6 +259,23 @@ fn parse_name(name: &str) -> Result<(String, String)> {
         let first_part = &name[..slash_pos];
         let rest = &name[slash_pos + 1..];
 
+        // Canonicalize well-known Docker Hub aliases before the generic
+        // registry-host heuristic. `docker.io`, `index.docker.io`,
+        // `registry.hub.docker.com`, and `registry-1.docker.io` all name
+        // the same registry; route them through this branch so the manifest
+        // host (`index.docker.io`) and the `library/` prefix are applied
+        // uniformly. `docker.io/v2/...` in particular is a marketing-site
+        // redirect, not a registry endpoint.
+        if is_docker_hub_alias(first_part) {
+            if rest.is_empty() {
+                return Err(Error::InvalidReference("empty repository".to_string()));
+            }
+            return Ok((
+                DEFAULT_REGISTRY.to_string(),
+                normalize_docker_hub_repository(rest),
+            ));
+        }
+
         // A registry host contains a dot, colon (port), or is "localhost"
         if first_part.contains('.') || first_part.contains(':') || first_part == "localhost" {
             // It's a registry
@@ -285,6 +302,18 @@ fn normalize_docker_hub_repository(name: &str) -> String {
     } else {
         format!("library/{}", name)
     }
+}
+
+/// Whether `host` is one of the registry hostnames Docker Hub is known by.
+///
+/// All four forms are accepted by the Docker CLI, podman, containerd, and
+/// crane; they all resolve to the same registry whose manifest API is at
+/// [`DEFAULT_REGISTRY`].
+fn is_docker_hub_alias(host: &str) -> bool {
+    matches!(
+        host,
+        "docker.io" | "index.docker.io" | "registry.hub.docker.com" | "registry-1.docker.io"
+    )
 }
 
 #[cfg(test)]
@@ -358,6 +387,59 @@ mod tests {
         assert_eq!(r.registry(), "localhost");
         assert_eq!(r.repository(), "myapp");
         assert_eq!(r.tag(), Some("latest"));
+    }
+
+    #[test]
+    fn test_parse_docker_io_alias_canonicalizes_to_index_docker_io() {
+        let r: Reference = "docker.io/library/alpine:3.21".parse().unwrap();
+        assert_eq!(r.registry(), DEFAULT_REGISTRY);
+        assert_eq!(r.repository(), "library/alpine");
+        assert_eq!(r.tag(), Some("3.21"));
+    }
+
+    #[test]
+    fn test_parse_docker_io_applies_library_prefix_to_single_component_repo() {
+        let r: Reference = "docker.io/alpine".parse().unwrap();
+        assert_eq!(r.registry(), DEFAULT_REGISTRY);
+        assert_eq!(r.repository(), "library/alpine");
+        assert_eq!(r.tag(), Some("latest"));
+    }
+
+    #[test]
+    fn test_parse_docker_io_preserves_explicit_org_repo() {
+        let r: Reference = "docker.io/myorg/myapp:v1".parse().unwrap();
+        assert_eq!(r.registry(), DEFAULT_REGISTRY);
+        assert_eq!(r.repository(), "myorg/myapp");
+        assert_eq!(r.tag(), Some("v1"));
+    }
+
+    #[test]
+    fn test_parse_registry_hub_docker_com_alias() {
+        let r: Reference = "registry.hub.docker.com/nginx".parse().unwrap();
+        assert_eq!(r.registry(), DEFAULT_REGISTRY);
+        assert_eq!(r.repository(), "library/nginx");
+    }
+
+    #[test]
+    fn test_parse_registry_one_docker_io_alias() {
+        let r: Reference = "registry-1.docker.io/library/busybox".parse().unwrap();
+        assert_eq!(r.registry(), DEFAULT_REGISTRY);
+        assert_eq!(r.repository(), "library/busybox");
+    }
+
+    #[test]
+    fn test_parse_index_docker_io_single_component_gets_library_prefix() {
+        // Previously produced `repo=alpine` with no prefix; now consistent
+        // with `docker.io/alpine` and the bare `alpine` form.
+        let r: Reference = "index.docker.io/alpine".parse().unwrap();
+        assert_eq!(r.registry(), DEFAULT_REGISTRY);
+        assert_eq!(r.repository(), "library/alpine");
+    }
+
+    #[test]
+    fn test_parse_docker_io_empty_repository_rejected() {
+        let r: Result<Reference> = "docker.io/".parse();
+        assert!(r.is_err());
     }
 
     #[test]
