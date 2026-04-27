@@ -260,10 +260,12 @@ fn parse_name(name: &str) -> Result<(String, String)> {
         let rest = &name[slash_pos + 1..];
 
         // Canonicalize well-known Docker Hub aliases before the generic
-        // registry-host heuristic. `docker.io`, `registry.hub.docker.com`,
-        // and `registry-1.docker.io` all refer to the same registry whose
-        // manifest API lives at `index.docker.io`; `docker.io/v2/...` in
-        // particular is a marketing-site redirect, not a registry endpoint.
+        // registry-host heuristic. `docker.io`, `index.docker.io`,
+        // `registry.hub.docker.com`, and `registry-1.docker.io` all name
+        // the same registry; route them through this branch so the manifest
+        // host (`index.docker.io`) and the `library/` prefix are applied
+        // uniformly. `docker.io/v2/...` in particular is a marketing-site
+        // redirect, not a registry endpoint.
         if is_docker_hub_alias(first_part) {
             if rest.is_empty() {
                 return Err(Error::InvalidReference("empty repository".to_string()));
