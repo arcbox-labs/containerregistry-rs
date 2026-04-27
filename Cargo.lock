@@ -178,7 +178,7 @@ checksum = "b05b61dc5112cbb17e4b6cd61790d9845d13888356391624cbe7e41efeac1e75"
 
 [[package]]
 name = "containerregistry"
-version = "0.1.2"
+version = "0.1.1"
 dependencies = [
  "containerregistry-auth",
  "containerregistry-image",
@@ -188,7 +188,7 @@ dependencies = [
 
 [[package]]
 name = "containerregistry-auth"
-version = "0.1.2"
+version = "0.1.1"
 dependencies = [
  "base64",
  "serde",
@@ -199,7 +199,7 @@ dependencies = [
 
 [[package]]
 name = "containerregistry-crane"
-version = "0.1.2"
+version = "0.1.1"
 dependencies = [
  "anyhow",
  "clap",
@@ -216,7 +216,7 @@ dependencies = [
 
 [[package]]
 name = "containerregistry-gcrane"
-version = "0.1.2"
+version = "0.1.1"
 dependencies = [
  "anyhow",
  "clap",
@@ -231,7 +231,7 @@ dependencies = [
 
 [[package]]
 name = "containerregistry-image"
-version = "0.1.2"
+version = "0.1.1"
 dependencies = [
  "hex",
  "serde",
@@ -243,7 +243,7 @@ dependencies = [
 
 [[package]]
 name = "containerregistry-layout"
-version = "0.1.2"
+version = "0.1.1"
 dependencies = [
  "containerregistry-image",
  "containerregistry-registry",
@@ -256,7 +256,7 @@ dependencies = [
 
 [[package]]
 name = "containerregistry-registry"
-version = "0.1.2"
+version = "0.1.1"
 dependencies = [
  "containerregistry-auth",
  "containerregistry-image",
@@ -272,7 +272,7 @@ dependencies = [
 
 [[package]]
 name = "containerregistry-testing"
-version = "0.1.2"
+version = "0.1.1"
 dependencies = [
  "containerregistry-auth",
  "containerregistry-image",
