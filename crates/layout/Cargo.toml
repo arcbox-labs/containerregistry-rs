@@ -15,5 +15,7 @@ thiserror.workspace = true
 
 [dev-dependencies]
 tempfile.workspace = true
-containerregistry-registry.workspace = true
+# Path-only (no version) so it is stripped from the published manifest, avoiding
+# the layout <-> registry circular dev-dep at publish time.
+containerregistry-registry = { path = "../registry" }
 tokio.workspace = true
